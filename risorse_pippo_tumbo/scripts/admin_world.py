@@ -210,7 +210,7 @@ def admin_world(coll, stile='A', M=None, scala=SCALA):
     R['mouth_curve'] = cu; R['mouth_base'] = base; R['mouth_obj'] = mo; R['mouth_y'] = my
     ap = R['mouth_open'] = E('BoccaAperta', (0, my + 0.005, -0.235), head)
     S('Labbra', 'sphere', (0, 0.008, 0), (0.21, 0.03, 0.085), ap, M['labbro']); S('BoccaDentro', 'sphere', (0, 0, 0), (0.19, 0.035, 0.07), ap, M['dentro'])
-    S('Lingua', 'sphere', (0, -0.01, -0.034), (0.065, 0.026, 0.026), ap, M['lingua']); S('Denti', 'sphere', (0, -0.012, 0.043), (0.085, 0.028, 0.018), ap, M['bianco'])
+    import bocca_interna; bocca_interna.sfere(ap, coll)                    # denti e lingua uguali per tutti (22 nov sera, come Bialada)
     ap.scale = (0.001,) * 3
     # braccia, gambe, scarpe lucide
     for s_, nm in ((-1, 'L'), (1, 'R')):
