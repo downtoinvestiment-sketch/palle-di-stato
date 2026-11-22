@@ -49,6 +49,8 @@ def applica(dentro, coll, togli=(), prefisso=None):
     for o in togli:
         if o is not None and o.name in bpy.data.objects: bpy.data.objects.remove(o, do_unlink=True)
     p = prefisso if prefisso is not None else dentro.name.split('_')[0] + '_'
+    if dentro.material_slots:                                                    # sfondo dietro i denti: rosso molto scuro (22 nov sera)
+        sl = dentro.material_slots[0]; sl.link = 'OBJECT'; sl.material = _mat('BOCCA_interno', (58, 8, 12), 0.6)
     denti = _falce(coll, dentro, p + 'DentiArcata', _mat('BOCCA_denti', (250, 247, 238), 0.3, coat=0.3), 0.77, 0.03, 0.42)
     lingua = _falce(coll, dentro, p + 'LinguaInterna', _mat('BOCCA_lingua', (206, 100, 104), 0.45), 0.55, 0.66, 0.96)
     return denti, lingua
