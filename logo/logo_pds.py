@@ -76,7 +76,72 @@ def logo_B():
     luci.cinema(C, mira, tuple(cam.location), distanza=5.0, lato=1); return rendi(sc, 'B')
 
 
-fatti = [{'A': logo_A, 'B': logo_B}[k]() for k in (sys.argv[1:] or ['A', 'B'])]
+def scena_min(W, H):
+    """minimal: fondo pieno blu notte, niente palco ne' anello, luce morbida"""
+    reset_scene(); set004._c.clear(); sc = bpy.context.scene; C = collection('C')
+    setup_render(sc, W, H, samples=24, fps=24, frames=1); A.qualita_eevee(preset='equilibrato', riflessi=False, scena=sc, risoluzione=(W, H))
+    world(sc, top=(0.0075, 0.016, 0.06), bottom=(0.0075, 0.016, 0.06), strength=1.0)
+    return sc, C
+
+
+def solo_testa(C, P):
+    """minimal: si vede solo la testa (il corpo sparisce)"""
+    def figlio(o, h):
+        while o is not None:
+            if o == h: return True
+            o = o.parent
+        return False
+    for o in C.objects:
+        if o.type in ('MESH', 'CURVE') and o.name.startswith(P['head'].name.split('_')[0] + '_') and not figlio(o, P['head']): o.hide_render = True
+
+
+def scritta(C, t, loc, size, col, spazio=1.0):
+    """scritta piatta e pulita (niente rilievo ne' contorno), che non prende ombre"""
+    cu = bpy.data.curves.new('T', 'FONT'); cu.body = t; cu.font = bpy.data.fonts.load(FONT, check_existing=True)
+    cu.size = size; cu.align_x = 'CENTER'; cu.align_y = 'CENTER'; cu.space_character = spazio
+    o = bpy.data.objects.new('Scritta', cu); C.objects.link(o); o.location = loc; o.rotation_euler = (math.pi / 2, 0, 0)
+    m = bpy.data.materials.new('scritta'); m.use_nodes = True; N = m.node_tree.nodes; N.clear()
+    e = N.new('ShaderNodeEmission'); e.inputs['Color'].default_value = (*col, 1); out = N.new('ShaderNodeOutputMaterial'); m.node_tree.links.new(e.outputs[0], out.inputs[0])
+    cu.materials.append(m); return o
+
+
+def cam_su(sc, C, mira, dist, lens, dz=0.0):
+    cam = bpy.data.objects.new('Cam', bpy.data.cameras.new('Cam')); C.objects.link(cam); sc.camera = cam; cam.data.lens = lens
+    cam.location = (0, -dist, mira.z + dz); luci.punta(cam, mira); luci.cinema(C, mira, tuple(cam.location), distanza=3.0, lato=1, forza=0.7)
+
+
+def logo_C():
+    """minimal, icona: solo la testa del Generale che urla, scritta piccola sotto"""
+    sc, C = scena_min(1080, 1080)
+    P = gn.generale(C, 'A'); gn.emozione(P, None, 'urla'); solo_testa(C, P); bpy.context.view_layer.update(); hz = P['head'].matrix_world.translation.z
+    scritta(C, 'PALLE DI STATO', (0, -0.6, hz - 0.62), 0.15, BIANCO, 1.15)
+    cam_su(sc, C, Vector((0, 0, hz - 0.16)), 5.2, 85); return rendi(sc, 'C')
+
+
+def logo_D():
+    """minimal, copertina: tre teste in fila, scritta pulita sotto e un punto rosso"""
+    sc, C = scena_min(1600, 900)
+    hz = 0
+    for fa, x, emo in ((lambda C: ci.cinese(C, 'B'), -0.95, lambda P: ci.emozione(P, None, 'furbo')),
+                       (lambda C: aw.admin_world(C, 'A'), 0.0, lambda P: aw.emozione(P, None, 'serio')),
+                       (lambda C: pl.platino(C, 'A'), 0.95, lambda P: pl.emozione(P, None, 'istituzionale'))):
+        P = fa(C); P['root'].location.x = x; emo(P); solo_testa(C, P); bpy.context.view_layer.update(); hz = max(hz, P['head'].matrix_world.translation.z)
+    scritta(C, 'PALLE DI STATO', (0, -0.9, hz - 0.62), 0.22, BIANCO, 1.15)
+    shape('Punto', 'sphere', loc=(0, -0.9, hz - 0.82), scale=(0.03, 0.01, 0.03), mat=material('punto', ROSSO, rough=0.4), coll=C)
+    cam_su(sc, C, Vector((0, 0, hz - 0.28)), 6.4, 60); return rendi(sc, 'D')
+
+
+def logo_E():
+    """minimal senza personaggi: la cravatta rossa del potere e la scritta"""
+    sc, C = scena_min(1080, 1080)
+    shape('Nodo', 'sphere', loc=(0, 0, 1.35), scale=(0.14, 0.08, 0.11), mat=material('cravatta', ROSSO, rough=0.35), coll=C)
+    shape('Cravatta', 'sphere', loc=(0, 0, 0.9), scale=(0.21, 0.07, 0.44), mat=material('cravatta', ROSSO, rough=0.35), coll=C)
+    shape('Punta', 'cone', loc=(0, 0, 0.4), rot=(math.pi, 0, 0), scale=(0.21, 0.07, 0.18), mat=material('cravatta', ROSSO, rough=0.35), coll=C)
+    scritta(C, 'PALLE DI STATO', (0, -0.3, -0.02), 0.26, BIANCO, 1.15)
+    cam_su(sc, C, Vector((0, 0, 0.7)), 4.6, 50); return rendi(sc, 'E')
+
+
+fatti = [{'A': logo_A, 'B': logo_B, 'C': logo_C, 'D': logo_D, 'E': logo_E}[k]() for k in (sys.argv[1:] or ['A', 'B'])]
 from PIL import Image
 ims = [Image.open(p).convert('RGB') for p in fatti]; hh = 720; ims = [im.resize((int(im.width * hh / im.height), hh)) for im in ims]
 f = Image.new('RGB', (sum(i.width for i in ims) + 20 * (len(ims) - 1), hh), (20, 20, 24)); x = 0
