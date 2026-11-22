@@ -17,6 +17,7 @@ Video satirici di geopolitica e politica italiana con le «palle di stato» (cou
 | Personaggio | File | Note |
 |---|---|---|
 | La Signora Platino (nome provvisorio) | `risorse_pippo_tumbo/scripts/platino.py` | Politica biondo platino, occhi azzurro-grigio, alta 165 cm. Versione scelta: A (blazer azzurro polvere). Scheda: `python risorse_pippo_tumbo/scripts/scheda_platino.py [A B C]` → `risorse_pippo_tumbo/schede/platino_versioni.jpg`. Personaggio inventato. |
+| Admin World | `risorse_pippo_tumbo/scripts/admin_world.py` | Politico con i capelli grigio-argento pettinati all'indietro e il ciuffo di lato, fronte molto alta, naso e orecchie molto grandi, mento quadrato, completo blu notte. Alto 180 cm. Scheda: `python risorse_pippo_tumbo/scripts/scheda_admin_world.py [A B C]` → `risorse_pippo_tumbo/schede/admin_world_versioni.jpg`. Personaggio inventato. |
 
 ## Licenze
 - Bandiere: flag-icons, MIT (vedi `modelli_satira/bandiere/LICENSE_flag-icons.txt`).
