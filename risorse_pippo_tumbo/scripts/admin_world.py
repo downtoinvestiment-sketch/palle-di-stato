@@ -34,8 +34,8 @@ def mats(stile='A'):
 
 
 def _argento():
-    """grigio-argento con le ciocche piu' scure (foto dell'autore): le ciocche partono dalla riga (a sinistra di chi guarda) e vanno
-    in versi opposti dai due lati, sempre un po' all'indietro"""
+    """grigio-argento con le ciocche piu' scure (foto dell'autore): sopra le ciocche vanno nette da sinistra verso destra,
+    sui lati dritte all'indietro"""
     if 'ADM_capelli' in bpy.data.materials: return bpy.data.materials['ADM_capelli']
     m = bpy.data.materials.new('ADM_capelli'); m.use_nodes = True; nt = m.node_tree; N = nt.nodes; L = nt.links
     bs = N['Principled BSDF']; bs.inputs['Roughness'].default_value = 0.45
@@ -47,14 +47,14 @@ def _argento():
         if isinstance(b, float): n.inputs[1].default_value = b
         else: L.new(b, n.inputs[1])
         return n.outputs[0]
-    wt = op('SUBTRACT', sp.outputs['Y'], op('MULTIPLY', op('ABSOLUTE', op('ADD', sp.outputs['X'], 0.13), 0.0), 0.8))   # sopra: a V dalla riga, versi opposti
-    mr = N.new('ShaderNodeMapRange'); mr.clamp = True; mr.inputs['From Min'].default_value = 0.2; mr.inputs['From Max'].default_value = 0.38; L.new(sp.outputs['Z'], mr.inputs['Value'])
+    wt = op('ADD', op('ADD', sp.outputs['Y'], op('MULTIPLY', sp.outputs['Z'], 1.2)), op('MULTIPLY', sp.outputs['X'], -0.08))   # sopra e davanti: ciocche nette da sinistra verso destra (22 nov sera)
+    mr = N.new('ShaderNodeMapRange'); mr.clamp = True; mr.inputs['From Min'].default_value = 0.18; mr.inputs['From Max'].default_value = 0.3; L.new(sp.outputs['Z'], mr.inputs['Value'])
     top = mr.outputs['Result']                                                 # sui lati le ciocche vanno dritte all'indietro
     w = op('ADD', op('MULTIPLY', wt, top), op('MULTIPLY', sp.outputs['Z'], op('SUBTRACT', 1.0, top)))
-    cb = N.new('ShaderNodeCombineXYZ'); L.new(op('MULTIPLY', w, 70.0), cb.inputs['X']); L.new(op('MULTIPLY', sp.outputs['X'], 2.5), cb.inputs['Y']); L.new(op('MULTIPLY', sp.outputs['Y'], 2.5), cb.inputs['Z'])
+    cb = N.new('ShaderNodeCombineXYZ'); L.new(op('MULTIPLY', w, 90.0), cb.inputs['X']); L.new(op('MULTIPLY', sp.outputs['X'], 2.5), cb.inputs['Y']); L.new(op('MULTIPLY', sp.outputs['Y'], 2.5), cb.inputs['Z'])
     nz = N.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.0; nz.inputs['Detail'].default_value = 6.0; L.new(cb.outputs['Vector'], nz.inputs['Vector'])
     cr = N.new('ShaderNodeValToRGB'); el = cr.color_ramp.elements
-    el[0].position = 0.43; el[0].color = (0.13, 0.13, 0.14, 1); el[1].position = 0.56; el[1].color = (0.6, 0.6, 0.64, 1)
+    el[0].position = 0.46; el[0].color = (0.12, 0.12, 0.13, 1); el[1].position = 0.53; el[1].color = (0.62, 0.62, 0.66, 1)
     L.new(nz.outputs['Fac'], cr.inputs['Fac']); L.new(cr.outputs['Color'], bs.inputs['Base Color'])
     bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.35; L.new(nz.outputs['Fac'], bp.inputs['Height']); L.new(bp.outputs['Normal'], bs.inputs['Normal'])
     return m
