@@ -89,10 +89,10 @@ def _testa(coll, parent, M, nome='ADM_Testa'):
                 k = 1.0 + 0.16 * _sst(0.0, 0.22, d) + 0.05 * _sst(0.0, 0.06, d); q_ = Vector((p_.x * k, p_.y * k, p_.z + 0.06 * _sst(0.05, 0.3, d)))
                 n_ = q_.normalized() if q_.length > 0 else Vector((0, 0, 1))
                 q_ += n_ * 0.01 * math.sin(p_.x * 34 + p_.y * 8) * _sst(0.0, 0.1, d)        # ciocche pettinate all'indietro
-                riga = math.exp(-((p_.x - 0.14) / 0.022) ** 2) * _sst(0.34, 0.5, p_.z) * _sst(0.2, -0.1, p_.y)   # riga a destra
+                riga = math.exp(-((p_.x + 0.13) / 0.022) ** 2) * _sst(0.34, 0.5, p_.z) * _sst(0.2, -0.1, p_.y)   # riga a sinistra (di chi guarda)
                 q_ -= n_ * 0.05 * riga
-                fr = _sst(0.0, 0.12, d) * _sst(-0.0, -0.32, p_.y) * _sst(0.16, -0.02, p_.x)   # ciuffo davanti spinto verso un lato (sinistra di chi guarda)
-                q_.z += 0.11 * fr * (1 - _sst(0.2, 0.34, d)); q_.x -= 0.1 * fr; q_.y -= 0.035 * fr
+                fr = _sst(0.0, 0.12, d) * _sst(-0.0, -0.32, p_.y) * _sst(-0.2, -0.08, p_.x) * _sst(0.18, 0.0, p_.x)   # ciuffo sottile vicino alla riga, verso sinistra (di chi guarda)
+                q_.z += 0.07 * fr * (1 - _sst(0.2, 0.34, d)); q_.x -= 0.07 * fr; q_.y -= 0.03 * fr
                 p_ = q_
             v.co = p_ * scala
         if tieni:
@@ -189,14 +189,14 @@ def admin_world(coll, stile='A', M=None, scala=SCALA):
     # bocca: labbra ben disegnate e simmetriche (curva + labbro di sotto), bocca a D col bordo quando parla
     my = _sulla_faccia(bvh, 0, -0.2, 0.004)[1]
     cu = bpy.data.curves.new('ADM_BoccaCurva', 'CURVE'); cu.dimensions = '3D'; cu.bevel_depth = 0.012; cu.bevel_resolution = 4; cu.use_fill_caps = True
-    sp = cu.splines.new('BEZIER'); sp.bezier_points.add(2); base = [(-0.1, my + 0.025, -0.19), (0, my - 0.0, -0.2), (0.1, my + 0.025, -0.19)]
+    sp = cu.splines.new('BEZIER'); sp.bezier_points.add(2); base = [(-0.14, my + 0.04, -0.19), (0, my - 0.0, -0.2), (0.14, my + 0.04, -0.19)]   # bocca grande, labbra sottili
     for bp, co in zip(sp.bezier_points, base): bp.co = co; bp.handle_left_type = bp.handle_right_type = 'AUTO'
     mo = bpy.data.objects.new('ADM_Bocca', cu); mo.parent = head; coll.objects.link(mo); mo.data.materials.append(M['bocca'])
-    S('LabbroSotto', 'sphere', (0, my + 0.006, -0.214), (0.055, 0.012, 0.009), mo, M['labbro'])                      # sparisce con la curva quando parla
-    S('LabbroSopra', 'sphere', (0, my + 0.008, -0.192), (0.062, 0.008, 0.005), mo, M['labbro'])
+    S('LabbroSotto', 'sphere', (0, my + 0.006, -0.214), (0.085, 0.012, 0.009), mo, M['labbro'])                      # sparisce con la curva quando parla
+    S('LabbroSopra', 'sphere', (0, my + 0.008, -0.192), (0.095, 0.008, 0.005), mo, M['labbro'])
     R['mouth_curve'] = cu; R['mouth_base'] = base; R['mouth_obj'] = mo; R['mouth_y'] = my
     ap = R['mouth_open'] = E('BoccaAperta', (0, my + 0.005, -0.21), head)
-    S('Labbra', 'sphere', (0, 0.008, 0), (0.12, 0.03, 0.08), ap, M['labbro']); S('BoccaDentro', 'sphere', (0, 0, 0), (0.104, 0.035, 0.066), ap, M['dentro'])
+    S('Labbra', 'sphere', (0, 0.008, 0), (0.16, 0.03, 0.08), ap, M['labbro']); S('BoccaDentro', 'sphere', (0, 0, 0), (0.142, 0.035, 0.066), ap, M['dentro'])
     S('Lingua', 'sphere', (0, -0.01, -0.034), (0.065, 0.026, 0.026), ap, M['lingua']); S('Denti', 'sphere', (0, -0.012, 0.043), (0.085, 0.028, 0.018), ap, M['bianco'])
     ap.scale = (0.001,) * 3
     # braccia, gambe, scarpe lucide
