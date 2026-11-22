@@ -26,7 +26,7 @@ def mats(stile='A'):
     M = dict(pelle=m('pelle', (0.95, 0.7, 0.58), rough=0.5), pelle_s=m('pelle_s', (0.88, 0.6, 0.5), rough=0.5), ruga=m('ruga', (0.66, 0.42, 0.35), rough=0.7),
              capelli=_argento(), sopr=m('sopr', (0.1, 0.085, 0.075), rough=0.6), iride=m('iride', (0.11, 0.06, 0.03), rough=0.25),
              bianco=m('bianco', (0.97, 0.97, 0.97), rough=0.3), nero=m('nero', (0.02, 0.02, 0.02), rough=0.15), bocca=m('bocca', (0.6, 0.32, 0.3), rough=0.45),
-             labbro=m('labbro', (0.72, 0.44, 0.4), rough=0.45), dentro=m('dentro', (0.16, 0.01, 0.03), rough=0.5), lingua=m('lingua', (0.95, 0.35, 0.40), rough=0.45),
+             labbro=m('labbro', (0.62, 0.3, 0.28), rough=0.45), dentro=m('dentro', (0.16, 0.01, 0.03), rough=0.5), lingua=m('lingua', (0.95, 0.35, 0.40), rough=0.45),
              scarpe=m('scarpe', (0.02, 0.02, 0.02), rough=0.15), camicia=m('camicia', (0.97, 0.97, 0.96), rough=0.5), pochette=m('pochette', (0.98, 0.98, 0.97), rough=0.45),
              giacca=m('giacca', (0.02, 0.035, 0.1), rough=0.5), panta=m('panta', (0.02, 0.035, 0.1), rough=0.55))
     M['cravatta'] = m('cravatta' + stile, {'A': (0.03, 0.12, 0.6), 'B': (0.12, 0.3, 0.55), 'C': (0.04, 0.1, 0.45)}[stile], rough=0.4)
@@ -34,15 +34,27 @@ def mats(stile='A'):
 
 
 def _argento():
-    """grigio-argento con le ciocche piu' scure, pettinato all'indietro (foto di riferimento dell'autore, 22 nov): striature lunghe dalla fronte alla nuca"""
+    """grigio-argento con le ciocche piu' scure (foto dell'autore): le ciocche partono dalla riga (a sinistra di chi guarda) e vanno
+    in versi opposti dai due lati, sempre un po' all'indietro"""
     if 'ADM_capelli' in bpy.data.materials: return bpy.data.materials['ADM_capelli']
     m = bpy.data.materials.new('ADM_capelli'); m.use_nodes = True; nt = m.node_tree; N = nt.nodes; L = nt.links
     bs = N['Principled BSDF']; bs.inputs['Roughness'].default_value = 0.45
-    tc = N.new('ShaderNodeTexCoord'); mp = N.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (55.0, 4.0, 10.0)    # striature lungo y (all'indietro)
-    L.new(tc.outputs['Object'], mp.inputs['Vector'])
-    nz = N.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.0; nz.inputs['Detail'].default_value = 6.0; L.new(mp.outputs['Vector'], nz.inputs['Vector'])
+    tc = N.new('ShaderNodeTexCoord'); sp = N.new('ShaderNodeSeparateXYZ'); L.new(tc.outputs['Object'], sp.inputs[0])
+    def op(o, a, b):
+        n = N.new('ShaderNodeMath'); n.operation = o
+        if isinstance(a, float): n.inputs[0].default_value = a
+        else: L.new(a, n.inputs[0])
+        if isinstance(b, float): n.inputs[1].default_value = b
+        else: L.new(b, n.inputs[1])
+        return n.outputs[0]
+    wt = op('SUBTRACT', sp.outputs['Y'], op('MULTIPLY', op('ABSOLUTE', op('ADD', sp.outputs['X'], 0.13), 0.0), 0.8))   # sopra: a V dalla riga, versi opposti
+    mr = N.new('ShaderNodeMapRange'); mr.clamp = True; mr.inputs['From Min'].default_value = 0.2; mr.inputs['From Max'].default_value = 0.38; L.new(sp.outputs['Z'], mr.inputs['Value'])
+    top = mr.outputs['Result']                                                 # sui lati le ciocche vanno dritte all'indietro
+    w = op('ADD', op('MULTIPLY', wt, top), op('MULTIPLY', sp.outputs['Z'], op('SUBTRACT', 1.0, top)))
+    cb = N.new('ShaderNodeCombineXYZ'); L.new(op('MULTIPLY', w, 70.0), cb.inputs['X']); L.new(op('MULTIPLY', sp.outputs['X'], 2.5), cb.inputs['Y']); L.new(op('MULTIPLY', sp.outputs['Y'], 2.5), cb.inputs['Z'])
+    nz = N.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.0; nz.inputs['Detail'].default_value = 6.0; L.new(cb.outputs['Vector'], nz.inputs['Vector'])
     cr = N.new('ShaderNodeValToRGB'); el = cr.color_ramp.elements
-    el[0].position = 0.38; el[0].color = (0.16, 0.16, 0.17, 1); el[1].position = 0.6; el[1].color = (0.62, 0.62, 0.66, 1)
+    el[0].position = 0.43; el[0].color = (0.13, 0.13, 0.14, 1); el[1].position = 0.56; el[1].color = (0.6, 0.6, 0.64, 1)
     L.new(nz.outputs['Fac'], cr.inputs['Fac']); L.new(cr.outputs['Color'], bs.inputs['Base Color'])
     bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.35; L.new(nz.outputs['Fac'], bp.inputs['Height']); L.new(bp.outputs['Normal'], bs.inputs['Normal'])
     return m
@@ -187,16 +199,16 @@ def admin_world(coll, stile='A', M=None, scala=SCALA):
     for z_, w_, o_ in ((0.22, 0.15, 0.005), (0.265, 0.17, -0.004), (0.305, 0.15, 0.004)):        # tre rughe marcate sulla fronte
         _ruga(coll, head, M, bvh, 'ADM_RugaFronte', [(-w_ + 2 * w_ * k / 6, z_ + o_ * math.cos(k * 2.1)) for k in range(7)], 0.0045)
     # bocca: labbra ben disegnate e simmetriche (curva + labbro di sotto), bocca a D col bordo quando parla
-    my = _sulla_faccia(bvh, 0, -0.2, 0.004)[1]
-    cu = bpy.data.curves.new('ADM_BoccaCurva', 'CURVE'); cu.dimensions = '3D'; cu.bevel_depth = 0.012; cu.bevel_resolution = 4; cu.use_fill_caps = True
-    sp = cu.splines.new('BEZIER'); sp.bezier_points.add(2); base = [(-0.14, my + 0.04, -0.19), (0, my - 0.0, -0.2), (0.14, my + 0.04, -0.19)]   # bocca grande, labbra sottili
+    my = _sulla_faccia(bvh, 0, -0.225, 0.004)[1]
+    cu = bpy.data.curves.new('ADM_BoccaCurva', 'CURVE'); cu.dimensions = '3D'; cu.bevel_depth = 0.015; cu.bevel_resolution = 4; cu.use_fill_caps = True
+    sp = cu.splines.new('BEZIER'); sp.bezier_points.add(2); base = [(-0.2, my + 0.075, -0.21), (0, my - 0.0, -0.226), (0.2, my + 0.075, -0.21)]   # bocca molto grande, labbra sottili
     for bp, co in zip(sp.bezier_points, base): bp.co = co; bp.handle_left_type = bp.handle_right_type = 'AUTO'
     mo = bpy.data.objects.new('ADM_Bocca', cu); mo.parent = head; coll.objects.link(mo); mo.data.materials.append(M['bocca'])
-    S('LabbroSotto', 'sphere', (0, my + 0.006, -0.214), (0.085, 0.012, 0.009), mo, M['labbro'])                      # sparisce con la curva quando parla
-    S('LabbroSopra', 'sphere', (0, my + 0.008, -0.192), (0.095, 0.008, 0.005), mo, M['labbro'])
+    S('LabbroSotto', 'sphere', (0, my + 0.008, -0.242), (0.13, 0.016, 0.015), mo, M['labbro'])                      # sparisce con la curva quando parla
+    S('LabbroSopra', 'sphere', (0, my + 0.01, -0.216), (0.14, 0.012, 0.008), mo, M['labbro'])
     R['mouth_curve'] = cu; R['mouth_base'] = base; R['mouth_obj'] = mo; R['mouth_y'] = my
-    ap = R['mouth_open'] = E('BoccaAperta', (0, my + 0.005, -0.21), head)
-    S('Labbra', 'sphere', (0, 0.008, 0), (0.16, 0.03, 0.08), ap, M['labbro']); S('BoccaDentro', 'sphere', (0, 0, 0), (0.142, 0.035, 0.066), ap, M['dentro'])
+    ap = R['mouth_open'] = E('BoccaAperta', (0, my + 0.005, -0.235), head)
+    S('Labbra', 'sphere', (0, 0.008, 0), (0.21, 0.03, 0.085), ap, M['labbro']); S('BoccaDentro', 'sphere', (0, 0, 0), (0.19, 0.035, 0.07), ap, M['dentro'])
     S('Lingua', 'sphere', (0, -0.01, -0.034), (0.065, 0.026, 0.026), ap, M['lingua']); S('Denti', 'sphere', (0, -0.012, 0.043), (0.085, 0.028, 0.018), ap, M['bianco'])
     ap.scale = (0.001,) * 3
     # braccia, gambe, scarpe lucide
@@ -233,7 +245,7 @@ def faccia(R, f, brow=0.0, brow_lift=0.0, smile=0.0, mouth_open=0.0, look=(0.0, 
     if mouth_open <= 0.02: ap.scale = (0.001,) * 3; mo.scale = (1, 1, 1)
     else:
         sz = 0.3 + 0.6 * mouth_open                                          # bocca aperta piu' piccola e bassa: non tocca il naso
-        ap.location = (0, R['mouth_y'] + 0.005, -0.215 - 0.012 * mouth_open - 0.01 * smile); ap.scale = (0.6 + 0.25 * mouth_open + 0.1 * max(0.0, smile), 1.0, sz * (1.0 - 0.08 * max(0.0, smile))); mo.scale = (0.001,) * 3
+        ap.location = (0, R['mouth_y'] + 0.005, -0.24 - 0.012 * mouth_open - 0.01 * smile); ap.scale = (0.6 + 0.25 * mouth_open + 0.1 * max(0.0, smile), 1.0, sz * (1.0 - 0.08 * max(0.0, smile))); mo.scale = (0.001,) * 3
     _k(ap, 'scale', f); _k(ap, 'location', f); _k(mo, 'scale', f)
 
 
