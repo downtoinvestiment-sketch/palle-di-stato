@@ -4,6 +4,8 @@ Video satirici di geopolitica e politica italiana con le «palle di stato» (cou
 
 ## Cosa c'è
 
+**Per tenere l'attenzione:** `ATTENZIONE.md` (regole di struttura, hook, colpi di scena, ritmo, regia, luce, suono e pubblicazione prese da Pippo e Tumbo, senza le cose personalizzate per quel canale). Istruzioni per Claude in `CLAUDE.md`.
+
 | Cartella | Contenuto |
 |---|---|
 | `palle.py` | Generatore di palle di stato: qualsiasi bandiera, occhi da cartone, espressioni (normale, felice, arrabbiato, triste, sorpreso, furbo, annoiato), sguardo. `python3 palle.py` crea `prova_palle.png`. |
