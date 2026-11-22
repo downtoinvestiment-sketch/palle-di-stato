@@ -12,6 +12,12 @@ Video satirici di geopolitica e politica italiana con le «palle di stato» (cou
 | `strumenti/` | Script per riscaricare bandiere (`scarica_bandiere.py`) e modelli Poly Haven (`scarica_polyhaven.py`, accetta altri id). |
 | `risorse_pippo_tumbo/` | Copia completa delle risorse di Pippo e Tumbo: personaggi (`scripts/pippo.py`, `pippo2.py`, `tumbo.py` e gli altri), libreria asset con tutti i modelli e le texture scaricate, mocap, canzone di Pippo, voci, musiche, effetti, copioni e documenti. `extra_machescienza/` contiene gli script del video «popstar che raddoppia». |
 
+## Personaggi politici
+
+| Personaggio | File | Note |
+|---|---|---|
+| La Signora Platino (nome provvisorio) | `risorse_pippo_tumbo/scripts/platino.py` | Politica biondo platino, occhi azzurro-grigio, alta 165 cm. Versione scelta: A (blazer azzurro polvere). Scheda: `python risorse_pippo_tumbo/scripts/scheda_platino.py [A B C]` → `risorse_pippo_tumbo/schede/platino_versioni.jpg`. Personaggio inventato. |
+
 ## Licenze
 - Bandiere: flag-icons, MIT (vedi `modelli_satira/bandiere/LICENSE_flag-icons.txt`).
 - Modelli Poly Haven: CC0.
