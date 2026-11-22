@@ -9,6 +9,7 @@ completo blu notte, camicia bianca, cravatta blu intenso, pelle avorio rosato ca
     aw.faccia(W, f, brow=0, brow_lift=0, smile=0, mouth_open=0, look=(0, 0), lid=0)
     aw.emozione(W, f, 'serio')                  # una delle EMOZIONI
     aw.gesto(W, f, 'arringa')                   # uno dei GESTI
+    aw.motion(W, f0, 'parla', durata=48)        # movimenti pronti: respira, parla, comizio, nega, annuisce
 Fronte -Y, piedi a z = 0. Pippo = 175 cm (2,30 unita') -> 180 cm = 2,37 unita' (SCALA misurata in scheda_admin_world.py)."""
 import math, bpy
 from mathutils import Vector
@@ -239,7 +240,7 @@ def faccia(R, f, brow=0.0, brow_lift=0.0, smile=0.0, mouth_open=0.0, look=(0.0, 
     cu = R['mouth_curve']
     for i, bp in enumerate(cu.splines[0].bezier_points):
         x, y, z = R['mouth_base'][i]; z = (z - 0.03 * smile) if i == 1 else (z + 0.035 * smile)
-        bp.co = (x * (1 + 0.3 * max(0, smile)), y, z); bp.handle_left_type = bp.handle_right_type = 'AUTO'
+        bp.co = (x * (1 + 0.08 * max(0, smile)), y, z); bp.handle_left_type = bp.handle_right_type = 'AUTO'
         if f is not None: bp.keyframe_insert('co', frame=f)
     ap = R['mouth_open']; mo = R['mouth_obj']
     if mouth_open <= 0.02: ap.scale = (0.001,) * 3; mo.scale = (1, 1, 1)
@@ -253,6 +254,7 @@ EMOZIONI = {
     'serio': dict(smile=-0.15, lid=0.32, brow=0.3), 'sorriso deciso': dict(smile=0.55, lid=0.35), 'composto': dict(smile=0.1, lid=0.3), 'sorriso misurato': dict(smile=1.1, lid=0.38, brow_lift=0.1), 'arringa': dict(smile=0.1, mouth_open=1.0, brow=0.5, brow_lift=0.3),
     'attento': dict(smile=0.0, brow=0.4, lid=0.25, look=(0.3, 0)), 'preoccupato': dict(smile=-0.6, brow=-0.8, brow_lift=0.6), 'sorpreso': dict(smile=-0.2, mouth_open=0.9, brow=-0.5, brow_lift=1.2),
     'ride': dict(smile=1.6, mouth_open=1.0, brow_lift=0.5, lid=0.45), 'furbo': dict(smile=0.8, brow=0.5, lid=0.4, look=(-0.8, 0)), 'arrabbiato': dict(smile=-0.9, brow=1.4, lid=0.2),
+    'sprezzante': dict(smile=0.35, brow=0.6, lid=0.5, look=(0.6, 0.2)), 'comizio': dict(smile=-0.1, mouth_open=1.4, brow=1.0, brow_lift=0.1), 'deluso': dict(smile=-0.8, brow=-0.4, lid=0.55, look=(0, -0.6)),
 }
 def emozione(R, f, nome): faccia(R, f, **EMOZIONI[nome])
 
@@ -261,9 +263,44 @@ GESTI = {                                                                    # b
     'arringa': ((-0.12, 0.05, -1), (0.4, -0.85, 0.25), (-0.06, 0, 0.05), (-0.03, 0)), 'mani giunte': ((0.3, -0.85, -0.3), (-0.3, -0.85, -0.3), (0.05, 0, 0), (0.03, 0)),
     'mano sul cuore': ((-0.1, 0.05, -1), (-0.6, -0.75, 0.1), (-0.05, 0, 0), (0, 0)), 'dito alzato': ((-0.1, 0.05, -1), (0.35, -0.4, 0.85), (-0.05, 0, 0), (0, 0)),
     'mani in tasca': ((-0.2, 0.1, -1), (0.2, 0.1, -1), (0, 0, 0), (-0.03, 0)), 'mano aperta': ((-0.1, 0.05, -1), (0.55, -0.65, -0.15), (0, -0.05, 0.05), (0, 0.04)),
+    'pugno alzato': ((-0.1, 0.05, -1), (0.15, -0.2, 1.0), (-0.12, 0, 0), (-0.05, 0)), 'braccia aperte': ((-0.9, -0.35, 0.1), (0.9, -0.35, 0.1), (-0.08, 0, 0), (-0.04, 0)),
+    'indica': ((-0.1, 0.05, -1), (0.1, -1.0, 0.05), (0.03, 0, 0.12), (0.06, 0.05)),
 }
 def gesto(R, f, nome):
     l, r, t, b = GESTI[nome]
     for nm, d in (('L', l), ('R', r)):
         sh = R['shoulder' + nm]; sh.rotation_mode = 'QUATERNION'; sh.rotation_quaternion = Vector((0, 0, -1)).rotation_difference(Vector(d).normalized()); _k(sh, 'rotation_quaternion', f)
     R['head'].rotation_euler = t; _k(R['head'], 'rotation_euler', f); R['body'].rotation_euler = (b[0], b[1], 0); _k(R['body'], 'rotation_euler', f)
+
+
+def motion(R, f0, nome, durata=48, fps=24):
+    """Movimenti pronti, da f0 per 'durata' fotogrammi (22 nov sera, chiesti dall'autore):
+    'respira' (fermo che respira e sbatte le palpebre), 'parla' (bocca che si apre e chiude, piccoli cenni con la testa e la mano),
+    'comizio' (pugno che batte il tempo, bocca aperta), 'nega' (scuote la testa), 'annuisce' (si' con la testa).
+    Restituisce il fotogramma finale."""
+    import random; rr = random.Random(len(nome) * 7 + f0)
+    h, b = R['head'], R['body']
+    for i in range(0, durata + 1, 2):
+        f = f0 + i; t = i / fps
+        b.rotation_euler = (0.012 * math.sin(t * 2.2), 0, 0); b.keyframe_insert('rotation_euler', frame=f)        # respiro
+        if nome == 'respira':
+            lid = 0.3 + (0.7 if (i % 72) in (36, 38) else 0.0); faccia(R, f, smile=-0.1, lid=lid, brow=0.3)
+            h.rotation_euler = (0.02 * math.sin(t * 0.9), 0.02 * math.sin(t * 0.7), 0.03 * math.sin(t * 0.5))
+        elif nome == 'parla':
+            mo = max(0.0, math.sin(t * 9.0) * 0.6 + math.sin(t * 13.7) * 0.4) * 0.9; faccia(R, f, smile=0.15, mouth_open=mo, brow=0.35 + 0.2 * math.sin(t * 3), lid=0.3)
+            h.rotation_euler = (0.04 * math.sin(t * 4.0), 0.0, 0.05 * math.sin(t * 1.7))
+        elif nome == 'comizio':
+            mo = max(0.0, math.sin(t * 8.0)) * 1.3; faccia(R, f, smile=-0.1, mouth_open=mo, brow=1.0, lid=0.25)
+            h.rotation_euler = (-0.06 + 0.05 * math.sin(t * 8.0), 0.0, 0.0)
+        elif nome == 'nega':
+            faccia(R, f, smile=-0.6, brow=0.8, lid=0.35); h.rotation_euler = (0.0, 0.0, 0.25 * math.sin(t * 10.0))
+        elif nome == 'annuisce':
+            faccia(R, f, smile=0.6, lid=0.35); h.rotation_euler = (0.12 * max(0.0, math.sin(t * 7.0)), 0.0, 0.0)
+        h.keyframe_insert('rotation_euler', frame=f)
+        if nome == 'comizio':                                                # il pugno batte il tempo
+            sh = R['shoulderR']; sh.rotation_mode = 'QUATERNION'; up = 0.5 + 0.5 * math.sin(t * 8.0)
+            sh.rotation_quaternion = Vector((0, 0, -1)).rotation_difference(Vector((0.2, -0.5 + 0.2 * up, 0.3 + 0.7 * up)).normalized()); sh.keyframe_insert('rotation_quaternion', frame=f)
+        elif nome == 'parla' and i % 8 == 0:                                 # la mano accompagna il discorso
+            sh = R['shoulderR']; sh.rotation_mode = 'QUATERNION'; a = 0.5 + 0.5 * math.sin(t * 2.5)
+            sh.rotation_quaternion = Vector((0, 0, -1)).rotation_difference(Vector((0.4, -0.75, -0.2 + 0.4 * a)).normalized()); sh.keyframe_insert('rotation_quaternion', frame=f)
+    return f0 + durata
