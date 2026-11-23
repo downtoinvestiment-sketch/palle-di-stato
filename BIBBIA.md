@@ -1,6 +1,6 @@
 # Bibbia interna di «Palle di Stato»
 
-Riferimenti solo per chi scrive (dall'autore, 23 novembre 2026). **Questi ruoli non vanno mai scritti** nei copioni, nei prompt per ElevenLabs, nei sottotitoli o nelle descrizioni: lì si usano solo i nomi fittizi (regola del `MASTER_PROMPT.md`). Voci e frasi: `FRASI_PERSONAGGI.md`.
+I ruoli dichiarano chi è ogni personaggio (dall'autore, 23 novembre 2026). **Prima di ogni copione e di ogni video si leggono sempre**: questa bibbia (ruoli), `FRASI_PERSONAGGI.md` (voci e frasi ripetute) e `MASTER_PROMPT.md`. Nei testi da mandare a ElevenLabs restano i nomi fittizi, come chiede la regola dell'autore.
 
 ## Ruoli di riferimento dei personaggi
 
