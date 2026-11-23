@@ -22,6 +22,10 @@ Voce e frasi ricorrenti di ogni personaggio di «Palle di Stato» (solo nomi fit
 - Voce: ruvida, schietta, un po' «casalinga/militare», con stoccate secche, tono spavaldo e improvvisi scatti d'ironia o autoironia. Non ha peli sulla lingua.
 - Frasi: «Care concittadine e cari concittadini» · «Costituzione, unità, pace e giovani» · «Disarmare le parole» · «Ma fammi il piacere» · «Senza ipocrisia» · «La verità è una sola» · «Non facciamo i fenomeni»
 
+**BIALADA**
+- Voce: pacata, misurata, bonaria ma ferma; tono da arbitro d'aula che richiama all'ordine, ai tempi, al regolamento e al rispetto reciproco con calma olimpica.
+- Frasi: «Colleghi, per favore» · «Atteniamoci all'ordine del giorno» · «I tempi sono scaduti» · «Manteniamo il decoro dell'aula»
+
 **AVVOCATO**
 - Voce: suadente, calibrata, elegante e un po' solenne; ritmo misurato da arringa, sembra sempre volersi smarcare con classe.
 - Frasi: «Cittadini» · «Devo fare nomi e cognomi» · «Avvocato del popolo» · «Con estrema prudenza» · «Serve una svolta» · «Non possiamo permetterci…» · «Io l'avevo già segnalato»
@@ -39,7 +43,8 @@ Voce e frasi ricorrenti di ogni personaggio di «Palle di Stato» (solo nomi fit
 - Frasi: «Il mondo al contrario» · «Testosteronico» · «Casa, famiglia, paura, ordine, tradimento, popolo» · «Avanti tutta!» · «Senza paura» · «Chi ha orecchie per intendere intenda» · «A testa bassa contro il sistema»
 
 **CAPPELLONE**
-- Frasi: «Mai vista una cosa del genere» · «Enorme» · «Notizie false» · «Caccia alle streghe» · «Prosciugare la palude» · «Torniamo grandi» · «Credetemi»
+- Voce: plateale, trionfale, iperbolica e squillante; tono da showman e affarista che ragiona solo per superlativi assoluti, scontri diretti e accordi clamorosi.
+- Frasi: «Mai vista una cosa del genere» · «Enorme» · «Notizie false» · «Caccia alle streghe» · «Prosciugare la palude» · «Torniamo grandi» · «Credetemi» · «Il più grande di sempre» · «Un disastro totale» · «Faremo un affare meraviglioso» · «Nessuno lo ha mai fatto prima» · «Notizie false!»
 
 **COMANDANTE**
 - Voce: tesa, urgente, diretta e carica di adrenalina; ritmo serrato da briefing continuo, appello immediato ad aiuti, forniture e resistenza.
