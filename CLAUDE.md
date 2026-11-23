@@ -7,4 +7,4 @@ Video satirici di geopolitica e politica italiana in Blender (vedi `README.md`).
 3. Le risorse di Pippo e Tumbo (script, libreria asset, mocap, musiche, effetti) sono copiate in `risorse_pippo_tumbo/`; le regole di quel canale (insulti, personaggi, format del vicino) **non** valgono qui.
 4. Dopo ogni modifica fai commit e push su questo repository, senza aspettare che l'autore lo chieda.
 5. Se un render si interrompe, riprendilo da solo fino alla fine.
-6. **Per i copioni usa `MASTER_PROMPT.md`** (ruolo, regole, cast con voci e tormentoni, formato di uscita: titolo, scena, copione, punchline), poi controlla con `ATTENZIONE.md`. Mai nomi, soprannomi o cariche di persone reali. Tormentoni in più per ogni personaggio: `FRASI_PERSONAGGI.md`.
+6. Come parlano i personaggi (voce e frasi ricorrenti): `FRASI_PERSONAGGI.md`.
