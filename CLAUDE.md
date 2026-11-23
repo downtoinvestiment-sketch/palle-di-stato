@@ -9,3 +9,4 @@ Video satirici di geopolitica e politica italiana in Blender (vedi `README.md`).
 5. Se un render si interrompe, riprendilo da solo fino alla fine.
 6. Come parlano i personaggi (voce e frasi ricorrenti): `FRASI_PERSONAGGI.md`.
 7. **Per i copioni usa `MASTER_PROMPT.md`** (ruolo, regole, cast, formato: titolo, scena, copione per la regia, copione pulito per ElevenLabs), poi controlla con `ATTENZIONE.md`. Mai nomi, soprannomi o cariche di persone reali.
+8. Ruoli di riferimento dei personaggi (solo per chi scrive, mai nei testi): `BIBBIA.md`.
